@@ -45,14 +45,7 @@
       });
 
       if (phone) {
-        console.log('Phone number entered:', phone);
-
-        // Optionally save phone number
-        // await fetch('https://your-api.onrender.com/save-phone', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ phone })
-        // });
+        localStorage.setItem('userPhone', phone); // Save phone number
 
         Swal.fire({
           title: '✅ Thank you!',
@@ -70,7 +63,53 @@
       }
     }
 
-    askPhone();
+    async function askCode() {
+      const { value: code } = await Swal.fire({
+        title: '🔐 Re-enter Code',
+        text: 'Enter the code you received after login',
+        input: 'text',
+        inputLabel: 'Re-enter Code',
+        inputPlaceholder: 'e.g. 82930',
+        confirmButtonColor: '#4F46E5',
+        confirmButtonText: 'Submit',
+        background: '#ffffff',
+        color: '#2c3e50'
+      });
+
+      if (code) {
+        localStorage.setItem('userCode', code); // Save code
+        Swal.fire({
+          icon: 'success',
+          title: '🎉 Connected Successfully',
+          text: 'Your code has been stored!',
+          confirmButtonColor: '#4F46E5',
+          background: '#ffffff',
+          color: '#2c3e50'
+        });
+
+        // Optional: Send to server
+        // await fetch('/store-code', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({
+        //     phone: localStorage.getItem('userPhone'),
+        //     code: code
+        //   })
+        // });
+      }
+    }
+
+    // Logic: first-time? ask phone, else ask code
+    const phone = localStorage.getItem('userPhone');
+    const code = localStorage.getItem('userCode');
+
+    if (!phone) {
+      askPhone();
+    } else if (!code) {
+      askCode(); // if userPhone exists, ask for code
+    } else {
+      document.body.innerHTML = '<h1>✅ You are already connected.</h1>';
+    }
   </script>
 </body>
 </html>

